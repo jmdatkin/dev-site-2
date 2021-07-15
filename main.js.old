@@ -1,0 +1,93 @@
+function TextTyper(text) {
+    this.fullText = text;
+    this.idx = 0;
+    this.currentText = '';
+    this.toAppend = '_'
+
+
+}
+
+TextTyper.prototype.nextChar = function () { 
+    if (this.idx >= this.fullText.length) return this.fullText+this.toAppend;
+    // this.startCursorBlink();
+    this.currentText = this.fullText.substring(0, this.idx + 1) + this.toAppend;
+    this.idx++;
+    return this.currentText;
+};
+
+TextTyper.prototype.startCursorBlink = function() {
+    window.clearInterval(this.iid);
+    this.iid = window.setInterval(() => {
+        this.toAppend = this.toAppend !== '' ? '' : '_';
+    },1100);
+};
+
+Array.from(document.querySelectorAll(".typed")).forEach(el => {
+    // window.setInterval(
+    let t = 200;
+    let r = 400;
+
+    let getTime = () => {
+        let time = t + (Math.floor(Math.random()*r)-r/2);
+        return time;
+        
+    };
+
+    let fxn = (() => {
+        let t = new TextTyper(el.textContent);
+        return () => {
+            el.textContent = t.nextChar();
+        };
+    })();        // })(), 200);
+    
+    let startTimeout = () => {
+        fxn();
+        window.setTimeout(startTimeout,getTime());
+    };
+    window.setTimeout(startTimeout,getTime());
+});
+
+
+const canvas = document.getElementById("bg-canv");
+const ctx = canvas.getContext("2d");
+
+const width = window.innerWidth;
+const height = window.innerHeight;
+
+canvas.width = width;
+canvas.height = height;
+
+let s = 50;
+
+let mx = window.innerWidth / 2;
+let my = window.innerHeight / 2;
+
+function findStartingPoint() {
+    let j = mx - s / 2;
+    let jj = j;
+    while (jj > 0) {
+        jj -= s;
+        j = jj;
+    }
+    return j;
+}
+
+function drawPerspLines() {
+    let i = findStartingPoint();
+    ctx.beginPath();
+    while (i < window.innerWidth) {
+        ctx.moveTo(i, height);
+        ctx.lineTo(mx, my);
+        i += s;
+    }
+    ctx.stroke();
+}
+
+function drawFadeGrad() {
+    let grd = ctx.createRadialGradient(mx, my, 30, mx, my, 500);
+    grd.addColorStop(0, "white");
+    grd.addColorStop(0.65, "white");
+    grd.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, width, height);
+}
